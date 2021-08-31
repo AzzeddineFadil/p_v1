@@ -1,10 +1,8 @@
 import pandas as pd
 import ta.volatility
-import ta.momentum
 import binance.client
 from binance.client import Client
-import talib as taa
-
+import Donchain_Channels as d
 
 """1 : you must to install library ta ==> pip install ta"""
 """2 : you must to install library pandas ==> pip install pandas"""
@@ -29,21 +27,32 @@ df["High"] = pd.to_numeric(df["High"])
 df["Low"] = pd.to_numeric(df["Low"])
 df["Volume"] = pd.to_numeric(df["Volume"])
 
-df['upper'] = ta.volatility.donchian_channel_hband(df["High"],df["Low"],df["Close"],window=50, offset=0, fillna=False)
-df['middelt'] = ta.volatility.donchian_channel_mband(df["High"],df["Low"],df["Close"],window=50, offset=0, fillna=False)
-df['lower'] = ta.volatility.donchian_channel_lband(df["High"],df["Low"],df["Close"],window=50, offset=0, fillna=False)
-
-
-for index, row in df.iterrows():
-    short = round(taa.EMA(df["Volume"], 5),2)
-    long = round(taa.EMA(df["Volume"], 20),2)
-    df['osc']= round(100*(short-long)/long,2)
-color = []
-for index, row in df.iterrows():
-    if(df['Close'][index]<df['Open'][index]):
-        color.append('r')
-    if(df['Close'][index]>=df['Open'][index]):
-        color.append('g')
-    
-df['color'] = color
 print(df)
+exit()
+DIMinus = df['adx1'] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window = 14, fillna= False).adx_neg()
+DIPlus = df['adx2'] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window = 14, fillna= False).adx_pos()
+
+"""DXdc = abs(DIPlus-DIMinus) / (DIPlus+DIMinus)*100
+smad = ta.trend.sma_indicator(DXdc, window=14, fillna=True)"""
+
+for index, row in df.iterrows():
+    DXdc = abs(df['adx1']-df['adx2']) / (df['adx1']+df['adx2'])*100
+    df['adx'] = ta.trend.sma_indicator(DXdc, window=14, fillna=True)
+
+
+
+
+for index, row in df.iterrows():
+    adxM = df['adx1'][index]
+    adxP = df['adx2'][index]
+    adxMI = df['adx'][index]
+    upper = d.df['upper'][index]
+    lower = d.df['lower'][index]
+    middelt = d.df['middelt'][index]
+    print(f" {adxP} {adxM} {adxMI} {upper} {lower} {middelt}")
+
+    
+        
+
+
+
